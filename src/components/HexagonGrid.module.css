@@ -1,0 +1,57 @@
+.canvasContainer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+  background: #030107; /* Pure Deep Void Black */
+  mask-image: radial-gradient(ellipse 95% 85% at 50% 50%, black 50%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 50%, black 50%, transparent 95%);
+}
+
+.hexCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Elegant Muted Gothic Atmospheric Mists (Non-Neon) */
+.gothicGlowViolet {
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(74, 14, 120, 0.15) 0%, transparent 70%);
+  filter: blur(140px);
+  z-index: 1;
+  pointer-events: none;
+  animation: pulseGothicViolet 10s ease-in-out infinite alternate;
+}
+
+.gothicGlowAmethyst {
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+  width: 750px;
+  height: 750px;
+  background: radial-gradient(circle, rgba(50, 10, 85, 0.15) 0%, transparent 70%);
+  filter: blur(150px);
+  z-index: 1;
+  pointer-events: none;
+  animation: pulseGothicAmethyst 12s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGothicViolet {
+  0% { opacity: 0.5; transform: scale(0.85) translate(-20px, -15px); }
+  100% { opacity: 0.9; transform: scale(1.1) translate(20px, 15px); }
+}
+
+@keyframes pulseGothicAmethyst {
+  0% { opacity: 0.5; transform: scale(0.85) translate(20px, 15px); }
+  100% { opacity: 0.9; transform: scale(1.1) translate(-20px, -15px); }
+}

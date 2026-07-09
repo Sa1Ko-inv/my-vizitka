@@ -1,0 +1,14 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.mainContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
