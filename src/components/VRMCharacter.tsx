@@ -232,7 +232,7 @@ export default function VRMCharacter() {
       loader.register((parser) => new VRMLoaderPlugin(parser))
 
       loader.load(
-         '/Sa1Ko.vrm',
+         '/my-vizitka/Sa1Ko.vrm',
          (gltf) => {
             vrm = gltf.userData.vrm as VRM
 

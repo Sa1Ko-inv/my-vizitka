@@ -6,6 +6,7 @@
    height: 100vh;
    z-index: -10;
    overflow: hidden;
+   background: #05010a; /* Very deep violet-black void */
 }
 
 .canvasEmbers {

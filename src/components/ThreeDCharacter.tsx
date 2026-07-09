@@ -92,7 +92,7 @@ export default function ThreeDCharacter() {
       gltfLoader.setDRACOLoader(dracoLoader)
 
       gltfLoader.load(
-         '/cnogami.glb',
+         '/my-vizitka/cnogami.glb',
          (gltf) => {
             const model = gltf.scene
 

@@ -153,7 +153,7 @@ export default function GothicBackground() {
       const spriteCtx = spriteCanvas.getContext('2d')
 
       const img = new Image()
-      img.src = '/purple_smoke.png'
+      img.src = '/my-vizitka/purple_smoke.png'
       img.onload = () => {
          if (!spriteCtx) return
          // Draw the highly detailed smoke texture
