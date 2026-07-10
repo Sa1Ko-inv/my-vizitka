@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import styles from './page.module.css'
 import VRMCharacter from '../components/VRMCharacter'
@@ -587,6 +587,7 @@ const GothicSectionDivider = () => {
 }
 
 export default function Home() {
+   const [heroAvatarLoaded, setHeroAvatarLoaded] = useState(false)
    const skills = [
       {
          category: 'Языки программирования',
@@ -1208,8 +1209,7 @@ export default function Home() {
          {/* ── GOTHIC SITE BACKGROUND & AMBIENCE ── */}
          <GothicBackground />
 
-         {/* ── 3D VRM AVATAR (GLOBAL FIXED OVERLAY WITH DYNAMIC SCROLL TRANSITIONS) ── */}
-         <VRMCharacter />
+         {/* ── 3D VRM AVATAR WAS HERE, NOW MOVED TO SECTIONS ── */}
 
          {/* ── NAVBAR ── */}
          <header className={styles.navbar}>
@@ -1272,10 +1272,11 @@ export default function Home() {
             </div>
 
             {/* Center: Placeholder box for the standing 3D VRM Avatar */}
-            <div className={styles.heroCenter}>
+            <div className={styles.heroCenter} style={{ position: 'relative' }}>
                <DepthScroll>
-                  <GothicCathedralPortal />
+                  {heroAvatarLoaded && <GothicCathedralPortal />}
                </DepthScroll>
+               <VRMCharacter mode="hero" onLoad={() => setHeroAvatarLoaded(true)} />
             </div>
 
             {/* Right: HUD Card (role + cta) */}
@@ -1383,7 +1384,9 @@ export default function Home() {
                   </div>
 
                   {/* Right column: Glowing backdrop box for the seated 3D VRM Avatar */}
-                  <div className={styles.aboutAvatarContainer}></div>
+                  <div className={styles.aboutAvatarContainer} style={{ position: 'relative', zIndex: 50 }}>
+                     <VRMCharacter mode="about" />
+                  </div>
                </div>
             </DepthScroll>
          </section>

@@ -6,7 +6,13 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { VRMLoaderPlugin, VRM, VRMHumanBoneName } from '@pixiv/three-vrm'
 
-export default function VRMCharacter() {
+export default function VRMCharacter({
+   mode = 'hero',
+   onLoad,
+}: {
+   mode?: 'hero' | 'about'
+   onLoad?: () => void
+}) {
    const wrapperRef = useRef<HTMLDivElement | null>(null)
    const containerRef = useRef<HTMLDivElement | null>(null)
    const [progress, setProgress] = useState(0)
@@ -67,6 +73,10 @@ export default function VRMCharacter() {
 
       // ── 5. ГРУППЫ СЦЕНЫ ──
       const rootGroup = new THREE.Group()
+      // Инициализируем стартовую позицию rootGroup сразу, чтобы избежать пролета
+      rootGroup.position.x = mode === 'about' ? 0.4 : 0
+      rootGroup.position.y = mode === 'about' ? 0.75 : 0.15
+      rootGroup.rotation.y = mode === 'about' ? -0.7 : 0
       scene.add(rootGroup)
       const interactGroup = new THREE.Group()
       rootGroup.add(interactGroup)
@@ -103,98 +113,103 @@ export default function VRMCharacter() {
          color: 0x0c0a12,
          roughness: 0.45,
       })
+      const screenFrameMaterial = new THREE.MeshStandardMaterial({
+         color: 0x1a1a2e,
+         roughness: 0.8,
+      })
+      const screenMaterial = new THREE.MeshBasicMaterial({
+         color: 0x050510,
+      })
 
-      // --- КИБЕР-СТОЛ ---
+      // --- ШИРОКИЙ РАБОЧИЙ СТОЛ (как на референсе) ---
       const deskGroup = new THREE.Group()
-      deskGroup.position.set(0, -0.3, 0.42)
+      deskGroup.position.set(-0.15, -0.28, 0.55)
       furnitureGroup.add(deskGroup)
 
-      // Столешница
-      const topMesh = new THREE.Mesh(
-         new THREE.BoxGeometry(1.1, 0.03, 0.6),
+      const deskTop = new THREE.Mesh(
+         new THREE.BoxGeometry(1.4, 0.04, 0.6),
          deskMaterial
       )
-      topMesh.castShadow = true
-      topMesh.receiveShadow = true
-      deskGroup.add(topMesh)
+      deskTop.position.set(0, 0, 0)
+      deskTop.castShadow = true
+      deskTop.receiveShadow = true
+      deskGroup.add(deskTop)
 
-      // Неоновая окантовка стола
-      const neonTrim = new THREE.Mesh(
-         new THREE.BoxGeometry(1.12, 0.008, 0.62),
-         neonPurple
+      const deskLegL = new THREE.Mesh(
+         new THREE.BoxGeometry(0.05, 0.75, 0.5),
+         deskMaterial
       )
-      deskGroup.add(neonTrim)
+      deskLegL.position.set(-0.65, -0.375, 0)
+      deskLegL.castShadow = true
+      deskGroup.add(deskLegL)
 
-      // Ножки стола
-      const legL = new THREE.Mesh(
-         new THREE.BoxGeometry(0.05, 0.8, 0.5),
+      const deskLegR = new THREE.Mesh(
+         new THREE.BoxGeometry(0.05, 0.75, 0.5),
+         deskMaterial
+      )
+      deskLegR.position.set(0.65, -0.375, 0)
+      deskLegR.castShadow = true
+      deskGroup.add(deskLegR)
+
+      // --- БОЛЬШОЙ ДЕСКТОПНЫЙ МОНИТОР ---
+      const monitorGroup = new THREE.Group()
+      monitorGroup.position.set(0.1, 0.04, 0.1)
+      // Разворачиваем монитор экраном к персонажу (на 180 градусов)
+      monitorGroup.rotation.y = Math.PI - 0.1 // Немного повернут к центру
+      deskGroup.add(monitorGroup)
+
+      const monitorBase = new THREE.Mesh(
+         new THREE.BoxGeometry(0.25, 0.02, 0.2),
          metalMaterial
       )
-      legL.position.set(-0.5, -0.4, 0)
-      legL.castShadow = true
-      deskGroup.add(legL)
+      monitorBase.position.set(0, 0, -0.05)
+      monitorBase.castShadow = true
+      monitorGroup.add(monitorBase)
 
-      const legR = new THREE.Mesh(
-         new THREE.BoxGeometry(0.05, 0.8, 0.5),
+      const monitorStand = new THREE.Mesh(
+         new THREE.BoxGeometry(0.04, 0.25, 0.04),
          metalMaterial
       )
-      legR.position.set(0.5, -0.4, 0)
-      legR.castShadow = true
-      deskGroup.add(legR)
+      monitorStand.position.set(0, 0.125, -0.05)
+      monitorStand.castShadow = true
+      monitorGroup.add(monitorStand)
 
-      // --- НОУТБУК РАЗРАБОТЧИКА ---
-      const laptopGroup = new THREE.Group()
-      laptopGroup.position.set(0, 0.015, -0.12)
-      laptopGroup.rotation.y = Math.PI
-      deskGroup.add(laptopGroup)
-
-      // Нижняя база (клавиатура)
-      const laptopBase = new THREE.Mesh(
-         new THREE.BoxGeometry(0.32, 0.012, 0.22),
-         metalMaterial
+      const monitorScreen = new THREE.Mesh(
+         new THREE.BoxGeometry(0.65, 0.4, 0.02),
+         screenFrameMaterial
       )
-      laptopBase.position.set(0, 0.006, -0.05)
-      laptopBase.castShadow = true
-      laptopGroup.add(laptopBase)
+      monitorScreen.position.set(0, 0.3, 0)
+      monitorScreen.rotation.x = -0.05
+      monitorScreen.castShadow = true
+      monitorGroup.add(monitorScreen)
 
-      // Светящаяся клавиатура
-      const kbMesh = new THREE.Mesh(
-         new THREE.BoxGeometry(0.29, 0.004, 0.13),
-         neonPurple
+      const screenGlass = new THREE.Mesh(
+         new THREE.PlaneGeometry(0.61, 0.36),
+         screenMaterial
       )
-      kbMesh.position.set(0, 0.012, -0.05)
-      laptopGroup.add(kbMesh)
+      screenGlass.position.set(0, 0, 0.011)
+      monitorScreen.add(screenGlass)
 
-      // Открытый экран ноутбука
-      const laptopScreenGroup = new THREE.Group()
-      laptopScreenGroup.position.set(0, 0.012, -0.15)
-      laptopScreenGroup.rotation.x = -0.25
-      laptopGroup.add(laptopScreenGroup)
-
-      const screenCover = new THREE.Mesh(
-         new THREE.BoxGeometry(0.32, 0.22, 0.01),
-         metalMaterial
+      // --- МИНИМАЛИСТИЧНАЯ КЛАВИАТУРА ---
+      const keyboardMaterial = new THREE.MeshStandardMaterial({
+         color: 0x8a2be2,
+         emissive: 0x8a2be2,
+         emissiveIntensity: 0.3,
+      })
+      const keyboard = new THREE.Mesh(
+         new THREE.BoxGeometry(0.45, 0.015, 0.14),
+         keyboardMaterial
       )
-      screenCover.position.set(0, 0.11, 0)
-      laptopScreenGroup.add(screenCover)
+      // Ставим ближе к краю стола со стороны персонажа
+      keyboard.position.set(0.15, 0.027, -0.15)
+      // Наклон клавишами к персонажу
+      keyboard.rotation.x = -0.05
+      keyboard.castShadow = true
+      deskGroup.add(keyboard)
 
-      const screenGlow = new THREE.Mesh(
-         new THREE.BoxGeometry(0.3, 0.2, 0.004),
-         neonViolet
-      )
-      screenGlow.position.set(0, 0.11, 0.005)
-      laptopScreenGroup.add(screenGlow)
-
-      const outerLogo = new THREE.Mesh(
-         new THREE.BoxGeometry(0.08, 0.08, 0.004),
-         neonPurple
-      )
-      outerLogo.position.set(0, 0.11, -0.005)
-      laptopScreenGroup.add(outerLogo)
-
-      // --- ОФИСНОЕ КРЕСЛО ---
+      // --- СТИЛЬНОЕ ИГРОВОЕ КРЕСЛО ---
       const chairGroup = new THREE.Group()
-      chairGroup.position.set(0, -0.48, -0.22)
+      chairGroup.position.set(0, -0.4, 0)
       furnitureGroup.add(chairGroup)
 
       // Сиденье
@@ -236,6 +251,29 @@ export default function VRMCharacter() {
          (gltf) => {
             vrm = gltf.userData.vrm as VRM
 
+            // Мгновенно инициализируем кости в нужную позицию, чтобы убрать скачок из T-pose
+            const h = vrm.humanoid
+            if (h) {
+               const setRot = (name: VRMHumanBoneName, x: number, y: number, z: number) => {
+                  const bone = h.getNormalizedBoneNode(name)
+                  if (bone) bone.rotation.set(x, y, z)
+               }
+               const isAbout = mode === 'about'
+               setRot(VRMHumanBoneName.LeftUpperArm, isAbout ? -0.5 : 0.05, isAbout ? -0.3 : 0, isAbout ? -1.2 : -1.25)
+               setRot(VRMHumanBoneName.RightUpperArm, isAbout ? -0.5 : 0.05, isAbout ? 0.3 : 0, isAbout ? 1.2 : 1.25)
+               setRot(VRMHumanBoneName.LeftLowerArm, isAbout ? -0.8 : -0.15, 0, 0)
+               setRot(VRMHumanBoneName.RightLowerArm, isAbout ? -0.8 : -0.15, 0, 0)
+               setRot(VRMHumanBoneName.LeftUpperLeg, isAbout ? -1.35 : 0.05, 0, 0)
+               setRot(VRMHumanBoneName.RightUpperLeg, isAbout ? -1.35 : 0.05, 0, 0)
+               setRot(VRMHumanBoneName.LeftLowerLeg, isAbout ? 1.25 : -0.05, 0, 0)
+               setRot(VRMHumanBoneName.RightLowerLeg, isAbout ? 1.25 : -0.05, 0, 0)
+               
+               const spine = h.getNormalizedBoneNode(VRMHumanBoneName.Spine)
+               if (spine) spine.rotation.x = isAbout ? 0.15 : 0
+               const hips = h.getNormalizedBoneNode(VRMHumanBoneName.Hips)
+               if (hips) hips.position.y = isAbout ? -0.38 : 0
+            }
+
             vrm.scene.traverse((obj) => {
                obj.frustumCulled = false
                if ((obj as THREE.Mesh).isMesh) {
@@ -247,6 +285,7 @@ export default function VRMCharacter() {
 
             interactGroup.add(vrm.scene)
             setLoading(false)
+            if (onLoad) onLoad()
          },
          (xhr) => {
             if (xhr.total > 0) {
@@ -257,6 +296,7 @@ export default function VRMCharacter() {
             console.error('VRM load error:', err)
             setError('Не удалось загрузить Sa1Ko.vrm')
             setLoading(false)
+            if (onLoad) onLoad()
          }
       )
 
@@ -274,36 +314,7 @@ export default function VRMCharacter() {
       }
       window.addEventListener('mousemove', onMouseMove)
 
-      // ── 8. ОТСЛЕЖИВАНИЕ СКРОЛЛА (БЕЗУПРЕЧНАЯ ПРИВЯЗКА К DOM СЕКЦИИ "ОБО МНЕ") ──
-      let scrollProgress = 0
-
-      const onScroll = () => {
-         const aboutEl = document.getElementById('about')
-         if (!aboutEl) return
-
-         const aboutTop = aboutEl.offsetTop
-         const targetTop = aboutTop > 0 ? aboutTop : window.innerHeight
-
-         if (window.scrollY <= targetTop) {
-            // ЭКРАН 1 -> 2: Плавный переход от Hero к секции Обо мне
-            scrollProgress = window.scrollY / targetTop // от 0.0 до 1.0
-            if (wrapperRef.current) {
-               wrapperRef.current.style.top = '0px'
-            }
-         } else {
-            // ЭКРАН 2+: Мы скроллим ниже секции Обо мне.
-            // Персонаж фиксируется в позе сидения (scrollProgress = 1.0)
-            // А сам контейнер сдвигается вверх ровно на столько пикселей, на сколько уехала секция Обо мне!
-            scrollProgress = 1.0
-            if (wrapperRef.current) {
-               const overScroll = window.scrollY - targetTop
-               wrapperRef.current.style.top = `-${overScroll}px`
-            }
-         }
-      }
-      window.addEventListener('scroll', onScroll)
-      // Вызовем сразу для корректной инициализации
-      onScroll()
+      // Скроллинг больше не отслеживаем, так как используются статические режимы (hero/about)
 
       // ── 9. РЕСАЙЗ ──
       const onResize = () => {
@@ -313,7 +324,6 @@ export default function VRMCharacter() {
          camera.aspect = w / h
          camera.updateProjectionMatrix()
          renderer.setSize(w, h)
-         onScroll()
       }
       window.addEventListener('resize', onResize)
 
@@ -326,6 +336,16 @@ export default function VRMCharacter() {
       let targetPosZ = 0
       let targetBaseRotY = 0
       let targetFurnitureScale = 0
+
+      // Камера: стартовые и конечные позиции (zoom-out эффект)
+      const camStartPos = new THREE.Vector3(0, 1.15, 1.8)
+      const camEndPos = new THREE.Vector3(
+         0,
+         mode === 'about' ? 1.1 : 1.15,
+         mode === 'about' ? 3.0 : 1.8
+      )
+      const camStartLook = new THREE.Vector3(0, 0.7, 0)
+      const camEndLook = new THREE.Vector3(0, mode === 'about' ? 0.3 : 0.7, 0)
 
       const targetBones = {
          leftUpperArmZ: -1.25,
@@ -354,61 +374,43 @@ export default function VRMCharacter() {
          const delta = (now - lastTime) / 1000
          lastTime = now
          const t = now / 1000
+         // ── КАМЕРА ──
+         camera.position.copy(mode === 'about' ? camEndPos : camStartPos)
+         camera.lookAt(mode === 'about' ? camEndLook : camStartLook)
 
-         // ── РАСЧЕТ ПОЗИЦИИ И ПОЗЫ НА ОСНОВЕ SCROLLPROGRESS (0.0 - 1.0) ──
-         // Hero (0.0): targetPosY = 0.15
-         // About (1.0): targetPosX = 1.25 (сдвинули еще левее для идеального центра в светящейся рамке), targetPosY = 0.88
-         targetPosX = THREE.MathUtils.lerp(0, 1.3, scrollProgress)
-         targetPosY = THREE.MathUtils.lerp(0.15, 0.88, scrollProgress)
-         targetPosZ = THREE.MathUtils.lerp(0, -5.5, scrollProgress)
-         targetBaseRotY = THREE.MathUtils.lerp(0, -0.35, scrollProgress)
-         targetFurnitureScale =
-            scrollProgress > 0.5 ? (scrollProgress - 0.5) * 2.0 : 0
+         // Hero: по центру, стоит
+         // About: правее, выше, сидит
+         targetPosX = mode === 'about' ? 0.4 : 0
+         targetPosY = mode === 'about' ? 0.75 : 0.15
+         targetPosZ = 0
+         targetBaseRotY = mode === 'about' ? -0.7 : 0
 
-         if (scrollProgress < 0.5) {
-            // СТОЯЧАЯ ПОЗА (HERO)
-            targetBones.leftUpperArmZ = -1.25
-            targetBones.rightUpperArmZ = 1.25
-            targetBones.leftUpperArmX = 0.05
-            targetBones.rightUpperArmX = 0.05
-            targetBones.leftUpperArmY = 0
-            targetBones.rightUpperArmY = 0
-            targetBones.leftLowerArmX = -0.15
-            targetBones.rightLowerArmX = -0.15
-            targetBones.leftLowerArmY = 0
-            targetBones.rightLowerArmY = 0
-            targetBones.leftLowerArmZ = 0
-            targetBones.rightLowerArmZ = 0
-            targetBones.leftUpperLegX = 0.05
-            targetBones.rightUpperLegX = 0.05
-            targetBones.leftLowerLegX = -0.05
-            targetBones.rightLowerLegX = -0.05
-            targetBones.spineX = 0
-            targetBones.hipsY = 0
-         } else {
-            // ПОЗА СИДЕНИЯ ЗА СТОЛОМ (ABOUT)
-            targetBones.leftUpperLegX = -1.3
-            targetBones.rightUpperLegX = -1.3
-            targetBones.leftLowerLegX = 1.2
-            targetBones.rightLowerLegX = 1.2
+         targetFurnitureScale = mode === 'about' ? 1 : 0
 
-            targetBones.leftUpperArmZ = -1.2
-            targetBones.rightUpperArmZ = 1.2
-            targetBones.leftUpperArmX = -0.2
-            targetBones.rightUpperArmX = -0.2
-            targetBones.leftUpperArmY = -0.3
-            targetBones.rightUpperArmY = 0.3
+         const isAbout = mode === 'about'
+         const sitBlend = mode === 'about' ? 1 : 0
 
-            targetBones.leftLowerArmX = -1.4
-            targetBones.rightLowerArmX = -1.4
-            targetBones.leftLowerArmY = 0
-            targetBones.rightLowerArmY = 0
-            targetBones.leftLowerArmZ = 0
-            targetBones.rightLowerArmZ = 0
+         targetBones.leftUpperArmZ = isAbout ? -1.2 : -1.25
+         targetBones.rightUpperArmZ = isAbout ? 1.2 : 1.25
+         targetBones.leftUpperArmX = isAbout ? -0.5 : 0.05
+         targetBones.rightUpperArmX = isAbout ? -0.5 : 0.05
+         targetBones.leftUpperArmY = isAbout ? -0.3 : 0
+         targetBones.rightUpperArmY = isAbout ? 0.3 : 0
 
-            targetBones.spineX = 0.15
-            targetBones.hipsY = -0.35
-         }
+         targetBones.leftLowerArmX = isAbout ? -0.8 : -0.15
+         targetBones.rightLowerArmX = isAbout ? -0.8 : -0.15
+         targetBones.leftLowerArmY = 0
+         targetBones.rightLowerArmY = 0
+         targetBones.leftLowerArmZ = 0
+         targetBones.rightLowerArmZ = 0
+
+         targetBones.leftUpperLegX = isAbout ? -1.35 : 0.05
+         targetBones.rightUpperLegX = isAbout ? -1.35 : 0.05
+         targetBones.leftLowerLegX = isAbout ? 1.25 : -0.05
+         targetBones.rightLowerLegX = isAbout ? 1.25 : -0.05
+
+         targetBones.spineX = isAbout ? 0.15 : 0
+         targetBones.hipsY = isAbout ? -0.38 : 0
 
          rootGroup.position.x += (targetPosX - rootGroup.position.x) * 0.05
          rootGroup.position.y += (targetPosY - rootGroup.position.y) * 0.05
@@ -498,7 +500,7 @@ export default function VRMCharacter() {
                leftLowerArm.rotation.z +=
                   (targetBones.leftLowerArmZ - leftLowerArm.rotation.z) * 0.15
 
-               if (scrollProgress >= 0.5) {
+               if (mode === 'about') {
                   leftLowerArm.rotation.x =
                      targetBones.leftLowerArmX + Math.sin(t * 15) * 0.04
                }
@@ -511,7 +513,7 @@ export default function VRMCharacter() {
                rightLowerArm.rotation.z +=
                   (targetBones.rightLowerArmZ - rightLowerArm.rotation.z) * 0.15
 
-               if (scrollProgress >= 0.5) {
+               if (mode === 'about') {
                   rightLowerArm.rotation.x =
                      targetBones.rightLowerArmX + Math.cos(t * 18) * 0.04
                }
@@ -557,7 +559,6 @@ export default function VRMCharacter() {
 
       return () => {
          window.removeEventListener('mousemove', onMouseMove)
-         window.removeEventListener('scroll', onScroll)
          window.removeEventListener('resize', onResize)
          cancelAnimationFrame(rafId)
          pmrem.dispose()
@@ -572,66 +573,161 @@ export default function VRMCharacter() {
       <div
          ref={wrapperRef}
          style={{
-            position: 'fixed',
+            position: 'absolute',
             top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
+            left: mode === 'hero' ? '-50%' : 0,
+            width: mode === 'hero' ? '200%' : '100%',
+            height: '100%',
             pointerEvents: 'none',
             zIndex: 10,
          }}
       >
+         <style>
+            {`
+               @keyframes smokeReveal {
+                  0% {
+                     opacity: 0;
+                     filter: blur(25px) brightness(1.5) contrast(0.8);
+                     transform: scale(0.95) translateY(30px);
+                  }
+                  100% {
+                     opacity: 1;
+                     filter: blur(0px) brightness(1) contrast(1);
+                     transform: scale(1) translateY(0);
+                  }
+               }
+               .smoke-reveal-active {
+                  animation: smokeReveal 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+               }
+            `}
+         </style>
          <div
             ref={containerRef}
+            className={!loading ? 'smoke-reveal-active' : ''}
             style={{
                width: '100%',
                height: '100%',
                position: 'absolute',
                inset: 0,
+               opacity: loading ? 0 : 1,
             }}
          />
 
          {loading && !error && (
             <div
                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
+                  position: mode === 'hero' ? 'fixed' : 'absolute',
+                  inset: 0,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '1rem',
-                  zIndex: 20,
-                  background: 'rgba(12,9,22,0.85)',
-                  padding: '2rem 3rem',
-                  borderRadius: '24px',
-                  border: '1px solid rgba(157,78,221,0.35)',
-                  backdropFilter: 'blur(12px)',
-                  boxShadow: '0 0 35px rgba(157,78,221,0.25)',
+                  justifyContent: 'center',
+                  zIndex: 9999,
+                  background: 'rgba(9, 7, 16, 0.95)',
+                  backdropFilter: 'blur(20px)',
+                  pointerEvents: 'all',
                }}
             >
                <div
                   style={{
-                     width: 48,
-                     height: 48,
-                     borderRadius: '50%',
-                     border: '3px solid rgba(255,255,255,0.1)',
-                     borderTopColor: 'var(--purple-bright)',
-                     borderBottomColor: 'var(--violet-mystic)',
-                     animation: 'spinRing 1s linear infinite',
-                  }}
-               />
-               <span
-                  style={{
-                     fontWeight: 800,
-                     color: '#fff',
-                     letterSpacing: 2,
-                     fontSize: '0.9rem',
+                     display: 'flex',
+                     flexDirection: 'column',
+                     alignItems: 'center',
+                     gap: '2.5rem',
                   }}
                >
-                  LOADING 3D AVATAR... {progress}%
-               </span>
+                  {/* Готическая статичная пентаграмма загрузки */}
+                  <svg width="250" height="250" viewBox="0 0 100 100" fill="none" style={{ filter: 'drop-shadow(0 0 10px rgba(177,0,232,0.4))' }}>
+                     {/* Внешние статичные круги */}
+                     <circle cx="50" cy="50" r="48" stroke="rgba(123, 44, 191, 0.3)" strokeWidth="1" />
+                     <circle cx="50" cy="50" r="42" stroke="rgba(123, 44, 191, 0.2)" strokeWidth="1" strokeDasharray="2 4" />
+                     
+                     {/* Пентаграмма на фоне */}
+                     <polygon 
+                        points="50,10 73.5,82.3 12,37.7 88,37.7 26.5,82.3" 
+                        fill="none" 
+                        stroke="rgba(177, 0, 232, 0.2)" 
+                        strokeWidth="1" 
+                     />
+                     
+                     {/* Заполнение пентаграммы по прогрессу */}
+                     <polygon 
+                        points="50,10 73.5,82.3 12,37.7 88,37.7 26.5,82.3" 
+                        fill="rgba(177, 0, 232, 0.05)" 
+                        stroke="#b100e8" 
+                        strokeWidth="1.5"
+                        strokeDasharray="380" // Периметр пентаграммы (5 * ~76)
+                        strokeDashoffset={380 - (380 * progress) / 100}
+                        style={{ transition: 'stroke-dashoffset 0.2s ease-out' }}
+                     />
+                     
+                     {/* Внутренний круг в центре пентаграммы */}
+                     <circle 
+                        cx="50" 
+                        cy="50" 
+                        r="12" 
+                        fill={progress >= 99 ? "rgba(177, 0, 232, 0.4)" : "transparent"} 
+                        stroke="#b100e8" 
+                        strokeWidth="1" 
+                        style={{ transition: 'fill 0.3s ease' }}
+                     />
+                     
+                     {/* Текст процента внутри */}
+                     <text 
+                        x="50" 
+                        y="54" 
+                        textAnchor="middle" 
+                        fill="#fff" 
+                        fontSize="12" 
+                        fontWeight="bold"
+                        letterSpacing="1"
+                     >
+                        {progress}
+                     </text>
+                  </svg>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                     <span
+                        style={{
+                           fontWeight: 600,
+                           color: 'rgba(255,255,255,0.9)',
+                           letterSpacing: '8px',
+                           fontSize: '1.2rem',
+                           textTransform: 'uppercase',
+                           textShadow: '0 0 15px rgba(177, 0, 232, 0.6)'
+                        }}
+                     >
+                        Awakening Avatar
+                     </span>
+                     
+                     {/* Статичная полоса прогресса, заполняется от центра */}
+                     <div 
+                        style={{ 
+                           width: '280px', 
+                           height: '3px', 
+                           background: 'rgba(255,255,255,0.1)', 
+                           marginTop: '0.5rem',
+                           position: 'relative',
+                           borderRadius: '2px',
+                           overflow: 'hidden'
+                        }}
+                     >
+                        <div 
+                           style={{ 
+                              position: 'absolute', 
+                              left: '50%', 
+                              top: 0, 
+                              height: '100%', 
+                              width: `${progress}%`, 
+                              background: '#b100e8', 
+                              transform: 'translateX(-50%)',
+                              boxShadow: '0 0 15px #b100e8',
+                              transition: 'width 0.2s ease-out'
+                           }} 
+                        />
+                     </div>
+                  </div>
+               </div>
             </div>
          )}
       </div>

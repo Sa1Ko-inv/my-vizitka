@@ -695,6 +695,7 @@
   border-radius: 24px;
   border: 1px solid rgba(255,255,255,0.05);
   overflow: hidden;
+  z-index: 10;
 }
 
 .aboutStatsRow {
