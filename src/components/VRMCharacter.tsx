@@ -20,6 +20,17 @@ export default function VRMCharacter({
    const [error, setError] = useState<string | null>(null)
 
    useEffect(() => {
+      if (mode === 'hero') {
+         document.body.style.overflow = loading ? 'hidden' : ''
+      }
+      return () => {
+         if (mode === 'hero') {
+            document.body.style.overflow = ''
+         }
+      }
+   }, [loading, mode])
+
+   useEffect(() => {
       if (!containerRef.current) return
       const container = containerRef.current
 
@@ -289,7 +300,7 @@ export default function VRMCharacter({
          },
          (xhr) => {
             if (xhr.total > 0) {
-               setProgress(Math.round((xhr.loaded / xhr.total) * 100))
+               setProgress(Math.min(100, Math.round((xhr.loaded / xhr.total) * 100)))
             }
          },
          (err) => {
