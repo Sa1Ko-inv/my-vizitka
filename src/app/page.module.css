@@ -1528,29 +1528,113 @@
 }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 1100px) {
-  .heroSection { grid-template-columns: 1fr 1.4fr 1fr; }
+@media (max-width: 1920px) {
+  .cathedralPortalContainer {
+    width: 700px;
+    height: 700px;
+  }
+  .portalCenterGlow {
+    width: 500px;
+    height: 500px;
+  }
+  .hudCardLeft, .hudCardRight {
+    max-width: 500px;
+    padding: 2.5rem 3rem;
+  }
+  .heroLeftHUD { padding-left: 3rem; }
+  .heroRightHUD { padding-right: 3rem; }
+}
+
+@media (max-width: 1440px) {
+  .heroSection { grid-template-columns: 1fr 1.2fr 1fr; }
   .heroName { font-size: 2.8rem; }
   .heroRole { font-size: 2rem; }
-  .aboutCard { grid-template-columns: 1fr auto 350px; gap: 2.5rem; }
+  .aboutCard { grid-template-columns: 1fr auto 350px; gap: 2rem; }
   .aboutAvatarContainer { height: 420px; }
+  
+  .cathedralPortalContainer { width: 600px; height: 600px; }
+  .portalCenterGlow { width: 450px; height: 450px; }
+  
+  .hudCardLeft, .hudCardRight { max-width: 420px; padding: 2rem 2.5rem; }
+  .sectionContainer { padding: 4rem 2rem; }
+  
+  .projectsGrid { gap: 1.2rem; }
+  .skillsGrid { gap: 1.5rem; }
+}
+
+@media (max-width: 1024px) {
+  .heroSection { 
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 55vh;
+    height: auto; 
+    padding-top: 100px; 
+    gap: 1.5rem;
+  }
+  .heroLeftHUD, .heroRightHUD { padding: 0 1.5rem; display: block; order: unset; align-self: stretch; }
+  .heroLeftHUD > div, .heroRightHUD > div { height: 100% !important; display: block !important; }
+  .hudCardLeft, .hudCardRight { max-width: 100%; height: 100% !important; justify-content: space-between; padding: 2rem; }
+  .heroCenter { order: 3; min-height: 400px; grid-column: 1 / -1; }
+  
+  .projectsGrid, .skillsGrid { grid-template-columns: 1fr; }
+  .aboutCard { grid-template-columns: 1fr; gap: 2.5rem; }
+  .aboutAvatarContainer { height: 450px; order: -1; } 
+  
+  .aboutStatsRow { 
+    flex-direction: row; 
+    border-left: none; 
+    border-right: none; 
+    border-bottom: 1px solid rgba(255,255,255,0.08); 
+    padding: 0 0 1.5rem 0; 
+  }
+  .contactsLinksGrid { grid-template-columns: 1fr 1fr; gap: 1rem; }
 }
 
 @media (max-width: 768px) {
-  .heroSection {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 60vh auto;
-    height: auto; padding-top: 80px;
-  }
-  .heroLeft { padding: 2rem 2rem 0; }
-  .heroRight { padding: 0 2rem 2rem; }
-  .heroCenter { order: -1; }
-  .navbar { padding: 1.2rem 2rem; }
+  .heroSection { padding-top: 80px; grid-template-rows: auto 50vh; gap: 1rem; }
+  .heroName { font-size: 1.6rem; margin-top: 0.8rem; }
+  .heroRoleHighlight { font-size: 1rem; }
+  .heroRole { font-size: 1.2rem; }
+  .navbar { padding: 1rem 1.5rem; flex-wrap: wrap; justify-content: center; gap: 1rem; }
+  .navBrand { margin-bottom: 0.5rem; }
   .navEmail { display: none; }
-  .sectionContainer { padding: 3.5rem 2rem; }
-  .projectsGrid, .skillsGrid { grid-template-columns: 1fr; }
+  .navLinks { gap: 1.2rem; width: 100%; justify-content: center; }
+  
+  .cathedralPortalContainer { width: 450px; height: 450px; }
+  .portalCenterGlow { width: 350px; height: 350px; }
+  
+  .hudCardLeft, .hudCardRight { padding: 1.2rem; }
+  .heroLeftHUD, .heroRightHUD { padding: 0 0.5rem; }
+  
+  .hudSocialIcon { width: 38px; height: 38px; }
+  .hudSocialIcon svg { width: 18px; height: 18px; }
+  .hudResumeBtn { padding: 0.8rem 1.6rem; font-size: 0.85rem; margin-top: 1rem; }
+  
+  .sectionContainer { padding: 3.5rem 1rem; }
+  .sectionTitle { font-size: 1.8rem; }
+  
+  .aboutStatsRow { flex-direction: column; align-items: center; gap: 1.5rem; }
+  .aboutAvatarContainer { height: 350px; }
   .contactsLinksGrid { grid-template-columns: 1fr; }
-  .aboutCard { grid-template-columns: 1fr; gap: 2.5rem; }
-  .aboutAvatarContainer { height: 400px; }
-  .aboutStatsRow { flex-direction: row; border-left: none; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 0 0 1.5rem 0; }
+  
+  .projectCard { padding: 1.8rem 1.5rem; }
+  .skillCard { padding: 1.8rem 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  .heroSection { grid-template-rows: auto 45vh; gap: 1rem; }
+  .heroName { font-size: 1.8rem; margin-top: 0.5rem; }
+  .heroRoleHighlight { font-size: 1.2rem; }
+  .heroRole { font-size: 1.3rem; }
+  
+  .cathedralPortalContainer { width: 320px; height: 320px; }
+  .portalCenterGlow { width: 250px; height: 250px; }
+  
+  .statNum { font-size: 2rem; }
+  .aboutAvatarContainer { height: 280px; }
+  
+  .projectItemTitle { font-size: 1.3rem; }
+  .skillCardTitle { font-size: 1.3rem; }
+  
+  .navLinks { gap: 0.8rem; }
+  .navLink { font-size: 0.75rem; }
 }

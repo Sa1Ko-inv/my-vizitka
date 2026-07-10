@@ -333,10 +333,19 @@ export default function VRMCharacter({
          const w = container.clientWidth
          const h = container.clientHeight
          camera.aspect = w / h
+         
+         // Увеличиваем FOV на узких экранах, чтобы модель не обрезалась
+         if (camera.aspect < 1) {
+            camera.fov = 32 + (1 - camera.aspect) * 35
+         } else {
+            camera.fov = 32
+         }
+         
          camera.updateProjectionMatrix()
          renderer.setSize(w, h)
       }
       window.addEventListener('resize', onResize)
+      onResize() // Инициализируем камеру правильным fov сразу
 
       // ── 10. ЦИКЛ АНИМАЦИИ ──
       let rafId: number

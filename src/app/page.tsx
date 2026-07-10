@@ -1276,7 +1276,10 @@ export default function Home() {
                <DepthScroll>
                   {heroAvatarLoaded && <GothicCathedralPortal />}
                </DepthScroll>
-               <VRMCharacter mode="hero" onLoad={() => setHeroAvatarLoaded(true)} />
+               <VRMCharacter
+                  mode='hero'
+                  onLoad={() => setHeroAvatarLoaded(true)}
+               />
             </div>
 
             {/* Right: HUD Card (role + cta) */}
@@ -1384,8 +1387,11 @@ export default function Home() {
                   </div>
 
                   {/* Right column: Glowing backdrop box for the seated 3D VRM Avatar */}
-                  <div className={styles.aboutAvatarContainer} style={{ position: 'relative', zIndex: 50 }}>
-                     <VRMCharacter mode="about" />
+                  <div
+                     className={styles.aboutAvatarContainer}
+                     style={{ position: 'relative', zIndex: 50 }}
+                  >
+                     <VRMCharacter mode='about' />
                   </div>
                </div>
             </DepthScroll>
